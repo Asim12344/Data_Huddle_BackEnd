@@ -14,8 +14,11 @@ class GetData(APIView):
         data = self.request.query_params
         try:
             company_name = data['companyName'] 
+            print("==================")
             today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h')
             yesterday_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=48h&before=24h')
+            # today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=48h&before=24h')
+            # yesterday_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=72h&before=48h')
             today_data = today_data.json()    
             yesterday_data = yesterday_data.json() 
             return Response({'today_data': today_data['data'] , 'yesterday_data':yesterday_data['data']})
@@ -35,7 +38,9 @@ class GetDataOfPreviousDays(APIView):
             mentions = []
             date_array = []
             today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h').json()
+            # today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=48h&before=24h').json()
             current_Date = datetime.datetime.today()
+            # current_Date = datetime.datetime.today() - datetime.timedelta(days=counter)
             mentions.append(len(today_data['data']))
             date_array.append(str(current_Date)[0:10])
             after = 48

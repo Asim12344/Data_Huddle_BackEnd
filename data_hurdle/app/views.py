@@ -9,7 +9,7 @@ import datetime
 
 
 class GetData(APIView):
-    permission_classes = (permissions.AllowAny, )
+    # permission_classes = (permissions.AllowAny, )
     def get(self, request, format=None):
         data = self.request.query_params
         try:
@@ -29,7 +29,7 @@ class GetData(APIView):
             return Response({'error': e})
 
 class GetDataOfPreviousDays(APIView):
-    permission_classes = (permissions.AllowAny, )
+    # permission_classes = (permissions.AllowAny, )
     def get(self, request, format=None):
         data = self.request.query_params
         try:

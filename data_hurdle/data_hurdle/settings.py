@@ -128,8 +128,8 @@ STATIC_URL = '/static/'
 # ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # REST_FRAMEWORK = {
 #     'DEFAULT_PERMISSION_CLASSES': [
@@ -144,4 +144,4 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-FILE_UPLOAD_PERMISSIONS=0o640
+# FILE_UPLOAD_PERMISSIONS=0o640

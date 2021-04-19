@@ -14,14 +14,27 @@ class GetData(APIView):
         data = self.request.query_params
         try:
             company_name = data['companyName'] 
+            yesterday_request = data['data'] 
             print("==================")
+            print(yesterday_request)
             today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h')
-            yesterday_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=48h&before=24h')
-            # today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=48h&before=24h')
-            # yesterday_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=72h&before=48h')
+            print(today_data.status_code)
+            while today_data.status_code != 200:
+                print("while")
+                today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h')
+                print(today_data.status_code)
             today_data = today_data.json()    
-            yesterday_data = yesterday_data.json() 
-            return Response({'today_data': today_data['data'] , 'yesterday_data':yesterday_data['data']})
+            if yesterday_request == "true":
+                print("true")
+                yesterday_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=48h&before=24h')
+                print(yesterday_data.status_code)
+                while yesterday_data.status_code != 200:
+                    print("while")
+                    yesterday_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=48h&before=24h')
+                    print(yesterday_data.status_code)
+                yesterday_data = yesterday_data.json() 
+                return Response({'today_data': today_data['data'] , 'yesterday_data':yesterday_data['data']})
+            return Response({'today_data': today_data['data']})
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -37,7 +50,13 @@ class GetDataOfPreviousDays(APIView):
             counter = 1
             mentions = []
             date_array = []
-            today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h').json()
+            today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h')
+            print(today_data.status_code)
+            while today_data.status_code != 200:
+                print("while")
+                today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h')
+                print(today_data.status_code)
+            today_data = today_data.json()
             # today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=48h&before=24h').json()
             current_Date = datetime.datetime.today()
             # current_Date = datetime.datetime.today() - datetime.timedelta(days=counter)
@@ -45,9 +64,17 @@ class GetDataOfPreviousDays(APIView):
             date_array.append(str(current_Date)[0:10])
             after = 48
             before = 24
-            while counter < 10:
+            while counter < 5:
                 print(counter)
-                data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=' + str(after) + 'h&before=' + str(before) + 'h').json()
+                data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=' + str(after) + 'h&before=' + str(before) + 'h')
+
+                print("======== DATA =========")
+                print(data.status_code)
+                while data.status_code != 200:
+                    print("while")
+                    data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=' + str(after) + 'h&before=' + str(before) + 'h')
+                    print(data.status_code)
+                data = data.json()
                 previous_Date = datetime.datetime.today() - datetime.timedelta(days=counter)
                 mentions.append(len(data['data']))
                 date_array.append(str(previous_Date)[0:10])
@@ -55,6 +82,8 @@ class GetDataOfPreviousDays(APIView):
                 before = before + 24
                 counter = counter + 1 
             return Response({'today_data': today_data['data'] , 'mentions':mentions , 'dates': date_array})
+
+            return Response({'today_data': "success"})
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]

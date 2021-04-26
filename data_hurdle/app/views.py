@@ -5,8 +5,8 @@ import sys, os
 from django.conf import settings
 import json
 import requests
-import datetime
-
+# import datetime
+from datetime import datetime,timedelta
 
 class GetData(APIView):
     # permission_classes = (permissions.AllowAny, )
@@ -16,7 +16,7 @@ class GetData(APIView):
             company_name = data['companyName'] 
             yesterday_request = data['data'] 
             print("==================")
-            print(yesterday_request)
+            print(company_name)
             today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h')
             print(today_data.status_code)
             while today_data.status_code != 200:
@@ -24,6 +24,7 @@ class GetData(APIView):
                 today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h')
                 print(today_data.status_code)
             today_data = today_data.json()    
+            print(len(today_data['data']))
             if yesterday_request == "true":
                 print("true")
                 yesterday_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=48h&before=24h')
@@ -41,49 +42,106 @@ class GetData(APIView):
             print(exc_type, fname, exc_tb.tb_lineno , e)
             return Response({'error': e})
 
+# class GetDataOfPreviousDays(APIView):
+#     # permission_classes = (permissions.AllowAny, )
+#     def get(self, request, format=None):
+#         data = self.request.query_params
+#         try:
+#             company_name = data['companyName'] 
+#             counter = 1
+#             mentions = []
+#             date_array = []
+#             today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h')
+#             print(today_data.status_code)
+#             while today_data.status_code != 200:
+#                 print("while")
+#                 today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h')
+#                 print(today_data.status_code)
+#             today_data = today_data.json()
+#             print(len(today_data['data']))
+#             # today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=48h&before=24h').json()
+#             current_Date = datetime.today()
+#             # current_Date = datetime.datetime.today() - datetime.timedelta(days=counter)
+#             mentions.append(len(today_data['data']))
+#             date_array.append(str(current_Date)[0:10])
+#             after = 48
+#             before = 24
+#             while counter < 5:
+#                 print(counter)
+#                 data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=' + str(after) + 'h&before=' + str(before) + 'h')
+
+#                 print("======== DATA =========")
+#                 print(data.status_code)
+#                 while data.status_code != 200:
+#                     print("while")
+#                     data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=' + str(after) + 'h&before=' + str(before) + 'h')
+#                     print(data.status_code)
+#                 data = data.json()
+#                 previous_Date = datetime.today() - timedelta(days=counter)
+#                 mentions.append(len(data['data']))
+#                 date_array.append(str(previous_Date)[0:10])
+#                 after = after + 24
+#                 before = before + 24
+#                 counter = counter + 1 
+#             return Response({'today_data': today_data['data'] , 'mentions':mentions , 'dates': date_array})
+
+#             return Response({'today_data': "success"})
+#         except Exception as e:
+#             exc_type, exc_obj, exc_tb = sys.exc_info()
+#             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+#             print(exc_type, fname, exc_tb.tb_lineno , e)
+#             return Response({'error': e})
+
 class GetDataOfPreviousDays(APIView):
     # permission_classes = (permissions.AllowAny, )
     def get(self, request, format=None):
         data = self.request.query_params
         try:
             company_name = data['companyName'] 
+            print("ppppppppppppp")
             counter = 1
             mentions = []
             date_array = []
-            today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h')
+            today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=120h&size=1000')
             print(today_data.status_code)
             while today_data.status_code != 200:
                 print("while")
-                today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=24h')
+                today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=120h&size=1000')
                 print(today_data.status_code)
             today_data = today_data.json()
-            # today_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=48h&before=24h').json()
-            current_Date = datetime.datetime.today()
-            # current_Date = datetime.datetime.today() - datetime.timedelta(days=counter)
-            mentions.append(len(today_data['data']))
-            date_array.append(str(current_Date)[0:10])
-            after = 48
-            before = 24
-            while counter < 5:
-                print(counter)
-                data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=' + str(after) + 'h&before=' + str(before) + 'h')
+            i = 0
+            obj = {}
+            count = 1
+            print(len(today_data['data']))
+            for data in today_data['data']:
+                get_time = datetime.fromtimestamp(data['created_utc'])
+                get_time = str(get_time)[0:10]
+                print(get_time)
+                if i == 0:
+                    obj[get_time] = count    
+                    count = count + 1
+                else:
+                    if get_time == previous_date:
+                        obj[get_time] = count 
+                        count = count + 1
+                    else:
+                        count = 1
+                        obj[get_time] = count
+                        count = count + 1
+                i = i + 1
+                previous_date = get_time
 
-                print("======== DATA =========")
-                print(data.status_code)
-                while data.status_code != 200:
-                    print("while")
-                    data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=' + str(after) + 'h&before=' + str(before) + 'h')
-                    print(data.status_code)
-                data = data.json()
-                previous_Date = datetime.datetime.today() - datetime.timedelta(days=counter)
-                mentions.append(len(data['data']))
-                date_array.append(str(previous_Date)[0:10])
-                after = after + 24
-                before = before + 24
-                counter = counter + 1 
-            return Response({'today_data': today_data['data'] , 'mentions':mentions , 'dates': date_array})
 
-            return Response({'today_data': "success"})
+            mentions = []
+            date_array = []
+            for o in obj:
+                print(o)
+                mentions.append(obj[o])
+                date_array.append(o)
+            print(mentions)
+            print(date_array)
+            return Response({'mentions':mentions , 'dates': date_array})
+
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]

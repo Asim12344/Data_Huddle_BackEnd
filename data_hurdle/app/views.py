@@ -63,25 +63,27 @@ class GetData(APIView):
                 yesterday_data = yesterday_data.json() 
                 print(len(yesterday_data['data']))
                 yesterday_data_array.extend(yesterday_data['data'])
-                previous_Date = datetime.today() - timedelta(days=1)
+                previous_Date = datetime.today() - timedelta(days=2)
                 print("=========== Process ==============")
                 while len(yesterday_data['data']) == 100:
                     
                     get_time = datetime.fromtimestamp(yesterday_data['data'][len(yesterday_data['data'])-1]['created_utc'])
                     print(previous_Date)
                     print(get_time)
-                    subtract = previous_Date - get_time
+                    subtract = get_time - previous_Date
                     print(subtract)
                     subtract = str(subtract)
                     print(subtract.split(":")[0])
                     hour = int(subtract.split(":")[0]) + 1
                     print(hour)
-                    hour =  48 -  hour
-                    yesterday_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after='+str(hour)+'h&before=24h&size=1000')
+                    hour =  48 - hour
+                    print("==== Hour ===")
+                    print(hour)
+                    yesterday_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=' + str(hour) + 'h&before=24h&size=1000')
                     print(yesterday_data.status_code)
                     while yesterday_data.status_code != 200:
                         print("while")
-                        yesterday_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after='+str(hour)+'h&before=24h&size=1000')
+                        yesterday_data = requests.get('https://api.pushshift.io/reddit/comment/search/?q='+company_name +'&after=' + str(hour)+ 'h&before=24h&size=1000')
                         print(yesterday_data.status_code)
                     yesterday_data = yesterday_data.json()   
                     print("====== Total yesterday_data Records ============")

@@ -15,7 +15,7 @@ class GetData(APIView):
         try:
             company_name = data['companyName'] 
             yesterday_request = data['data'] 
-            print("==================")
+            print("=================")
             print(company_name)
             today_data_array = []
             yesterday_data_array = []
